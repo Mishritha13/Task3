@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Advanced Styling & JS - Quiz + API + Responsive</title>
+  <style>
+    /* Base Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #eef2f3;
+      color: #333;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    /* Quiz Styles */
+    .quiz-question {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    .options {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+
+    .options li {
+      margin-bottom: 10px;
+    }
+
+    .options input[type="radio"] {
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Result display */
+    #result {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      text-align: center;
+      color: green;
+    }
+
+    /* Joke Section */
+    .joke-box {
+      margin-top: 40px;
+      background: #fafafa;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .joke-text {
+      font-style: italic;
+      margin-bottom: 15px;
+      min-height: 60px;
+    }
+
+    /* Responsive styling */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      .quiz-question {
+        font-size: 1.1rem;
+      }
+
+      button {
+        width: 100%;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      .quiz-question {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Interactive Quiz with Responsive Design & Joke API</h1>
+
+    <!-- Quiz Section -->
+    <div id="quiz-container">
+      <div id="question" class="quiz-question"></div>
+      <ul id="options" class="options"></ul>
+      <button id="next-btn">Next</button>
+      <div id="result"></div>
+    </div>
+
+    <!-- Joke Section -->
+    <div class="joke-box">
+      <h2>Need a laugh? Get a random joke!</h2>
+      <div class="joke-text" id="joke">Click the button below to fetch a joke.</div>
+      <button id="joke-btn">Get Joke</button>
+    </div>
+  </div>
+
+  <script>
+    // Quiz data
+    const quizData = [
+      {
+        question: "Which language runs in a web browser?",
+        options: ["Java", "C", "Python", "JavaScript"],
+        answer: "JavaScript"
+      },
+      {
+        question: "What does CSS stand for?",
+        options: ["Central Style Sheets", "Cascading Style Sheets", "Cascading Simple Sheets", "Cars SUVs Sailboats"],
+        answer: "Cascading Style Sheets"
+      },
+      {
+        question: "What does HTML stand for?",
+        options: ["HyperText Markup Language", "Hyperloop Machine Language", "HyperText Markdown Language", "Helicopters Terminals Motorboats Lamborginis"],
+        answer: "HyperText Markup Language"
+      },
+      {
+        question: "Which company developed React?",
+        options: ["Google", "Facebook", "Microsoft", "Twitter"],
+        answer: "Facebook"
+      }
+    ];
+
+    // Quiz variables
+    let currentQuestion = 0;
+    let score = 0;
+
+    // DOM Elements
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const resultEl = document.getElementById('result');
+
+    // Load question function
+    function loadQuestion() {
+      clearResult();
+      const q = quizData[currentQuestion];
+      questionEl.textContent = `${currentQuestion + 1}. ${q.question}`;
+      optionsEl.innerHTML = '';
+      q.options.forEach(option => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <label>
+            <input type="radio" name="option" value="${option}" />
+            ${option}
+          </label>
+        `;
+        optionsEl.appendChild(li);
+      });
+      nextBtn.textContent = currentQuestion === quizData.length - 1 ? 'Submit' : 'Next';
+    }
+
+    // Clear result message
+    function clearResult() {
+      resultEl.textContent = '';
+    }
+
+    // Check answer function
+    function checkAnswer() {
+      const selected = document.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        alert('Please select an answer!');
+        return false;
+      }
+      if (selected.value === quizData[currentQuestion].answer) {
+        score++;
+      }
+      return true;
+    }
+
+    // Show final score
+    function showScore() {
+      questionEl.textContent = 'Quiz Completed!';
+      optionsEl.innerHTML = '';
+      nextBtn.style.display = 'none';
+      resultEl.textContent = `You scored ${score} out of ${quizData.length}!`;
+    }
+
+    // Next button event
+    nextBtn.addEventListener('click', () => {
+      if (!checkAnswer()) return;
+
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showScore();
+      }
+    });
+
+    // Initialize quiz on load
+    loadQuestion();
+
+    // Joke API section
+    const jokeBtn = document.getElementById('joke-btn');
+    const jokeEl = document.getElementById('joke');
+
+    jokeBtn.addEventListener('click', async () => {
+      jokeEl.textContent = 'Loading joke...';
+      try {
+        const response = await fetch('https://icanhazdadjoke.com/', {
+          headers: {
+            Accept: 'application/json'
+          }
+        });
+        const data = await response.json();
+        jokeEl.textContent = data.joke;
+      } catch (error) {
+        jokeEl.textContent = 'Oops! Could not fetch a joke.';
+      }
+    });
+  </script>
+
+</body>
+</html>
